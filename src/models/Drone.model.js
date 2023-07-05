@@ -6,7 +6,7 @@ const {
 } = require("../utils/constants/general");
 const { Schema } = mongoose;
 
-const Drone = new Schema(
+const DroneSchema = new Schema(
   {
     serialNumber: {
       type: String,
@@ -18,13 +18,17 @@ const Drone = new Schema(
       enum: [DroneModel.LIGHT_WEIGHT, DroneModel.MIDDLE_WEIGHT, DroneModel.CRUISER_WEIGHT, DroneModel.HEAVY_WEIGHT],
       default: DroneModel.LIGHT_WEIGHT,
     },
-    weight: {
+    weightLimit: {
       type: Number,
       max: 500
     },
     unit: {
       type: String,
       default: "g"
+    },
+    batteryCapacity: {
+      type: { type: String, default: "percentage" },
+      percentage: Number,
     },
     state: {
       type: String,
@@ -37,9 +41,11 @@ const Drone = new Schema(
   }
 );
 
-Drone.pre("findOneAndUpdate", function (next) {
+DroneSchema.pre("findOneAndUpdate", function (next) {
   this._update.updatedAt = new Date();
   next();
 });
 
-module.exports.Drone = mongoose.model("Drones", Drone);
+const Drone = mongoose.model("drones", DroneSchema);
+
+module.exports = Drone;

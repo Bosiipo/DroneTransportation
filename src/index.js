@@ -1,11 +1,12 @@
+import '@babel/polyfill';
 import express from 'express';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import routes from './routes/index';
 console.log("HERE");
-import '@babel/polyfill';
-const db = import('./utils/database/index');
+// const db = import('./utils/database/index');
+
 
 //Gaining access to .env file
 dotenv.config();
@@ -21,11 +22,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(routes);
 
-db.then(() => {
+const { connectMongoose } = require("./utils/database/mongoose");
+connectMongoose();
+
+
+// db.then((d) => {
+    // console.log({d})
     app.listen(port, () => {
       console.info(`App running on port ${port}`);
     });
-    console.log('Database connected...');
-  })
-  .catch(e => console.log('error...', e));
+    // console.log('Database connected...');
+  // })
+  // .catch(e => console.log('error...', e));
 

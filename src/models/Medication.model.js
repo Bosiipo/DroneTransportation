@@ -2,22 +2,24 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const Medication = new Schema(
+const MedicationSchema = new Schema(
   {
     name: {
       type: String,
     },
     weight: {
-      type: String,
+      type: Number
     },
     image: {
-      type: Number,
-      max: 500
+      type: String
     },
     code: {
       type: String,
-      // required: true,
       match: /^[A-Z0-9_]+$/,
+    },
+    droneId: {
+      type: Schema.Types.ObjectId,
+      ref: "drones",
     },
   },
   {
@@ -25,9 +27,12 @@ const Medication = new Schema(
   }
 );
 
-Medication.pre("findOneAndUpdate", function (next) {
+MedicationSchema.pre("findOneAndUpdate", function (next) {
   this._update.updatedAt = new Date();
   next();
 });
 
-module.exports.Medication = mongoose.model("Medications", Medication);
+const Medication = mongoose.model("medications", MedicationSchema);
+
+module.exports = Medication;
+
