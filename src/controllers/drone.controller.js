@@ -8,9 +8,9 @@ class DroneController {
   static async registerDrone(req, res) {
     try {
       console.log("BEGIN!");
-      const { serialNumber, model, weight, percentage, state } = req.body;
+      const { serialNumber, model, weight, batteryLevel, state } = req.body;
       let batteryCapacity = {
-        percentage
+        percentage: batteryLevel
       };
 
       const existingDrone = await Drone.findOne({serialNumber});
@@ -24,7 +24,7 @@ class DroneController {
         model, 
         weight, 
         batteryCapacity,
-        state: percentage < 25 ? DroneState.IDLE : DroneState.LOADING,
+        state: batteryLevel < 25 ? DroneState.IDLE : DroneState.LOADING,
       };
 
       let drone = new Drone(dronePayload);
@@ -144,15 +144,19 @@ class DroneController {
         {
           $unwind: {
             path: "$medications",
-            preserveNullAndEmptyArrays: true,
+            preserveNullAndEmptyArrays: false,
           },
         },
       ]);
 
+      let medications = [];
+      data = data.map(d => {
+        medications.push(d.medications)
+      });
 
       return res.status(200).json({
         status: 'success',
-        data
+        medications
       });
     } catch (err) {
       return res.status(500).json({
