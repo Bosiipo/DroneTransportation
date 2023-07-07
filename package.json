@@ -2,13 +2,13 @@
   "name": "drone-transportation",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/davidokonji/Node-boilerplate.git",
   "author": "Sogbolu Olabosipo <bosiposhogbolu@gmail.com>",
   "license": "MIT",
   "scripts": {
     "start": "node build/index.js",
     "prestart": "yarn run build",
-    "build": "./node_modules/.bin/babel src -d build"
+    "build": "./node_modules/.bin/babel src -d build",
+    "updateDroneState": "NODE_ENV=development && nodemon ./worker/index.js updateDroneState"
   },
   "dependencies": {
     "@babel/polyfill": "^7.12.1",

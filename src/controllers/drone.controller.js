@@ -4,7 +4,6 @@ import Medication from '../models/Medication.model';
 import { DroneState } from '../utils/constants/general';
 import mongoose from 'mongoose';
 
-
 class DroneController {
   static async registerDrone(req, res) {
     try {
@@ -24,8 +23,8 @@ class DroneController {
         serialNumber, 
         model, 
         weight, 
-        batteryCapacity, 
-        state
+        batteryCapacity,
+        state: percentage < 25 ? DroneState.IDLE : DroneState.LOADING,
       };
 
       let drone = new Drone(dronePayload);
@@ -37,7 +36,6 @@ class DroneController {
         drone
       });
     } catch (err) {
-      console.log({err})
       return res.status(500).json({
         status: 'error',
         message: err.message,
@@ -95,6 +93,8 @@ class DroneController {
 
       if(!drone) throw new Error("Drone not found!");
 
+      if(drone.batteryCapacity.percentage < 25) throw new Error("Drone battery is below 25%, drone cannot be loaded!");
+
       let medicationTotalWeight = medications.reduce((a,b) => a + b.weight, 0);
 
       if (medicationTotalWeight > drone.weightLimit) {
@@ -114,6 +114,45 @@ class DroneController {
       return res.status(200).json({
         status: 'success',
         medications: uploadedMedications
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: 'error',
+        message: err.message,
+      });
+    }
+  }
+
+  static async getMedicationItemsForADrone(req, res) {
+    try {
+      const { droneId } = req.params;
+
+      let data = await Drone.aggregate([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(droneId)
+          }
+        },
+        {
+          $lookup: {
+            from: "medications",
+            localField: "_id",
+            foreignField: "droneId",
+            as: "medications",
+          },
+        },
+        {
+          $unwind: {
+            path: "$medications",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+      ]);
+
+
+      return res.status(200).json({
+        status: 'success',
+        data
       });
     } catch (err) {
       return res.status(500).json({
